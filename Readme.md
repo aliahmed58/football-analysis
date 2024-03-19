@@ -11,6 +11,8 @@ All commands from root of the project
 - Install CUDA toolkit 11.8.x from NVIDIA website
 - Torch should be packaged with CUDA. ```pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu117``` For more info check: [cuda site](https://pytorch.org/get-started/locally/)
 
+- Add ```best.pt``` (yolov5 trained weights) in a directory in ```inference/weights/best.pt```
+
 1. Create a virtual environment in the root directory (preferred) using ```python3.8 -m venv ./venv```
 
 2. Install requiremnts using ```pip install -r requirements.txt```
