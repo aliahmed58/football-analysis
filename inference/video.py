@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 import os
 from typing import Generator, Dict
-from helper.containers import Rect, Color
+from util.containers import Rect, Color
 
 
 # -------------------------------------------------------
