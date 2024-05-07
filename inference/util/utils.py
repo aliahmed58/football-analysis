@@ -1,7 +1,11 @@
 import os
 import numpy as np
+import scipy.io as sio
 from PIL import Image
+from typing import List
 from pathlib import Path
+from cvdetection import Detection
+from inference.detection.teamdetector.BoundingBox import PlayerBoundingBox
 
 # ----------------------------------------------
 # utility methods reused throughout the project
@@ -51,3 +55,24 @@ def concatenate_multiple_images(*images):
         image_to_be_saved = np.concatenate((image_to_be_saved, im, img_delimiter), axis=1)
     return image_to_be_saved
 
+def get_camera_estimator_files_path():
+    return f'{get_project_root()}/detection/cameraestimator/files'
+
+# get binary court using the mat lab file
+def get_binary_court():
+    return sio.loadmat(f'{get_camera_estimator_files_path()}/worldcup2014.mat')
+
+# path to the siamese.pth model file
+def get_siamese_model_path():
+    return f'{get_project_root()}/mlmodels/generated_models/siamese'
+
+# Detection instacne to BoundingBox instance convertor 
+# easier than to refactor a lot of already existing code.
+def detections_to_bounding_box(image: np.ndarray, dbox: List[Detection]) -> List[PlayerBoundingBox]:
+    boxes: List[PlayerBoundingBox] = []
+    for b in dbox:
+        x1, y1 = b.rect.top_left.x, b.rect.top_left.y
+        x2, y2 = b.rect.bottom_right.x, b.rect.bottom_right.y
+        boxes.append(PlayerBoundingBox(image, box_coords=(x1, y1, x2, y2), score=b.confidence))
+    
+    return boxes

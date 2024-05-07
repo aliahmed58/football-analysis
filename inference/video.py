@@ -41,7 +41,7 @@ def get_video_writer(output_video_path: str, config: Dict) -> cv2.VideoWriter:
         output_video_path, 
         fourcc=cv2.VideoWriter_fourcc(*'mp4v'),
         fps=30,
-        frameSize=(1920, 1080),
+        frameSize=(1280, 720),
         isColor=True
     )
 
@@ -49,8 +49,8 @@ def get_video_writer(output_video_path: str, config: Dict) -> cv2.VideoWriter:
 # Drawing utilities on videos such as drawing rects, etc.
 # -------------------------------------------------------
 
-def draw_rect(image: np.ndarray, rect: Rect, color: Color, thickness: int = 2) -> np.ndarray:
-    cv2.rectangle(image, rect.top_left.int_xy_tuple, rect.bottom_right.int_xy_tuple, color.bgr_tuple, thickness)
+def draw_rect(image: np.ndarray, coords: tuple, color: tuple, thickness: int = 2) -> np.ndarray:
+    cv2.rectangle(image, (coords[0], coords[1]), (coords[2], coords[3]), color, thickness)
     return image
 
 

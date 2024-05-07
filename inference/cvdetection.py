@@ -1,8 +1,9 @@
 import numpy as np
 import video
-from typing import Dict, List
+from typing import Dict, List, Tuple
 from util.containers import Rect, Color
 from dataclasses import dataclass
+from detection.teamdetector.BoundingBox import PlayerBoundingBox
 
 # ----------------------------------------------------
 # Basic yolo detection module for players, balls etc
@@ -54,6 +55,7 @@ def filter_detections_by_class(detections: List[Detection], class_name: str) -> 
 # ---------------------------------------------------------
 # draw rects on detected objects on the frame to output a video
 # ---------------------------------------------------------
-def annotate(frame: np.ndarray, detections: List[Detection]) -> None:
+def annotate(frame: np.ndarray, detections: List[PlayerBoundingBox]) -> None:
     for detection in detections:
-        frame = video.draw_rect(frame, detection.rect, Color.from_hex_string('FFFF00'), 2)
+        int_coords: Tuple[int] = tuple(int(x) for x in detection.box_coords)
+        frame = video.draw_rect(frame, int_coords, detection.color, 2)

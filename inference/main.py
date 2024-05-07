@@ -7,15 +7,29 @@ import inference.util.utils as util
 import inference.util.config as config
 from typing import Generator, List
 from detection.court_detector import CourtDetector
+from detection.cameraestimator.CameraEstimator import CameraEstimator, estimate
+from detection.teamclassifier.PlayerClustering import ColorHistogramClassifier
+from detection.teamdetector.TeamDetector import TeamDetector
+from detection.yolo_detector import YoloDetector
+from detection.gameanalytics.GameAnalytics import GameAnalytics
 
 def detect(): 
 
     # Create necessary detection objects
-    court_detector = CourtDetector(output_resolution=(1920, 1080))
+    court_detector: CourtDetector = CourtDetector(output_resolution=(1920, 1080))
+    camera_estimator: CameraEstimator = CameraEstimator(output_resolution=(1920, 1080))
+    
+    team_classifier: ColorHistogramClassifier = ColorHistogramClassifier(num_of_teams=3)
+    object_detector: YoloDetector = YoloDetector()
+    team_detector: TeamDetector = TeamDetector(None, None)
+    team_classifier.initialize_using_video('./videos/test.mp4', object_detector, court_detector, training_frames=50)
+    team_detector.player_clustering = team_classifier
 
-    # load the yolov5 model for this project
-    model = torch.hub.load('ultralytics/yolov5', 'custom', 'weights/best.pt',device=0, force_reload=True)
-    # model = YOLO('yolov8n.pt', task='predict', verbose=True)
+    analysis: GameAnalytics = GameAnalytics()
+    analysis.infer_team_sides(
+        './videos/test.mp4', court_detector, object_detector, team_classifier, camera_estimator, training_frames=1
+    )
+
     # frame iterator to loop over input video frames
     frame_iterator: Generator[np.ndarray, None, None] = iter(video.generate_frames('./videos/test.mp4'))
 
@@ -24,48 +38,50 @@ def detect():
     # output video writer
     output_video_path: str = f'{util.get_project_root()}/{config.OUTPUT_DIR_NAME}/{config.INPUT_VIDEO_NAME}'
     video_writer: cv2.VideoWriter = video.get_video_writer(output_video_path, None) 
+    map2d = video.get_video_writer('map.mp4', None)
 
     frame_index: int = 0
     for frame in frame_iterator:
         print(f'Processing {frame_index} - frame')
         
-        # do detections
-        results = model(frame, size=1280)
-        
-        # get detections from the predicted results
-        detections = cvdetection.Detection.get_detections_from_results(
-            predictions=results.pred[0].cpu().numpy(),
-            names=model.names
-        )
-
-        # filter detections by class names
-        ball_detections: List[cvdetection.Detection] = cvdetection.filter_detections_by_class(detections=detections, class_name="ball")
-        referee_detections: List[cvdetection.Detection] = cvdetection.filter_detections_by_class(detections=detections, class_name="referee")
-        goalkeeper_detections: List[cvdetection.Detection] = cvdetection.filter_detections_by_class(detections=detections, class_name="goalkeeper")
-        player_detections: List[cvdetection.Detection] = cvdetection.filter_detections_by_class(detections=detections, class_name="player")
-
-        person_detections: List[cvdetection.Detection] = referee_detections + goalkeeper_detections + player_detections
 
         drawn_frame: np.ndarray = frame.copy()
+        masked_court_image, masked_edge_image = court_detector.get_masked_and_edge_court(drawn_frame)
 
-        masked_court_image, masked_edge_image = court_detector.get_masked_and_edge_court(frame)
+        player_boxes, ball_boxes = object_detector.detect(frame, team_classifier)
 
-        if frame_index == 0:
-            print(type(masked_court_image))
-        # detection.annotate(drawn_frame, person_detections)
-        cvdetection.annotate(drawn_frame, ball_detections)
-        cvdetection.annotate(drawn_frame, person_detections)
+        # get the estimated edge map
+        estimated_edge_map = estimate(camera_estimator, masked_edge_image)
 
-        video_writer.write(masked_edge_image)
-        # send detected data to the court detector ?
+        # # detection.annotate(drawn_frame, person_detections)
+        cvdetection.annotate(drawn_frame, player_boxes)
+        cvdetection.annotate(drawn_frame, ball_boxes)
 
+        output_frame = drawn_frame.copy()
+        output_frame = cv2.addWeighted(
+            src1=output_frame, 
+            src2=estimated_edge_map,
+            alpha=0.95, beta=0.9, gamma=0.)
+        
+        player_positions = team_detector.draw_on_field_points(output_frame, player_boxes)
 
-        # plot x,y coordinates to 2d field 
+        output_frame = cv2.addWeighted(
+            src1=output_frame,
+            src2=player_positions,
+            alpha=0.95, beta=.9, gamma=0
+        )
+        
+        analysis.update(camera_estimator.last_estimated_homography, player_boxes + ball_boxes)
+        top_view_with_board = analysis.get_analytics()
 
-        # emit this data to csv file
+        # video_writer.write(output_frame)
+        video_writer.write(top_view_with_board)
+
         frame_index += 1
     
+    analysis.save_coords_data(analysis.player_list, 'players.csv')
     video_writer.release()
+    map2d.release()
 
 
 if __name__ == '__main__':
