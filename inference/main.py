@@ -42,7 +42,7 @@ def detect():
 
     frame_index: int = 0
     for frame in frame_iterator:
-        print(f'Processing {frame_index} - frame')
+        # print(f'Processing {frame_index} - frame')
         
 
         drawn_frame: np.ndarray = frame.copy()

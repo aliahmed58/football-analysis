@@ -52,6 +52,10 @@ class GameAnalytics:
         ball_points = filter(lambda x: x.color == (255, 255, 255), self.current_points)
         self.ball_history.extend([p.coords for p in ball_points])
 
+    # @utils.logging_time
+    def get_analytics(self):
+        info_board = self.get_info_board()
+        top_view_frame = self.get_top_view()
         # TODO Get different goal keepers as well and keep colors dynamic
         player_points = filter(lambda x: x.color != (255, 255, 255), self.current_points)
 
@@ -60,11 +64,6 @@ class GameAnalytics:
         self._append_rows_to_list(player_points, self.player_list)
 
         self.frame += 1
-
-    # @utils.logging_time
-    def get_analytics(self):
-        info_board = self.get_info_board()
-        top_view_frame = self.get_top_view()
         return np.concatenate([top_view_frame, info_board], axis=0)
 
     def get_top_view(self):
@@ -95,6 +94,7 @@ class GameAnalytics:
             if dist < self.possession_radius:
                 self.color_team_in_possession = p.color
                 p.possession = 1
+                print('possession set: ', p.possession)
                 # if (dist(self.posession_last_points - self.ball_point) > some_threshold):
                     # consider it a pass and add to a pass network :D
                 # check if the last ball point in possession and current has a difference of some threshold
