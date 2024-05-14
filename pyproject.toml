@@ -2,3 +2,34 @@
 name = "inference"
 version = "0.1.0"
 description = "inference module for football detection"
+[tool.poetry]
+name = "inference"
+version = "0.1.0"
+description = "Detection and 2D mapping module for football analysis on videos"
+authors = ["Your Name <you@example.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "3.9"
+numpy = "1.24.1"
+matplotlib = "^3.7.5"
+scipy = "1.10.1"
+opencv-python = "^4.9"
+pandas = "^2.0"
+torch = {version = "^2.3.0+cu118", source = "nvidia"}
+torchvision = {version = "^0.18.0+cu118", source = "nvidia"}
+torchaudio = {version = "^2.3.0+cu118", source = "nvidia"}
+ultralytics = "^8.2.15"
+requests = "^2.31.0"
+pyflann-py3 = "^0.1.0"
+scikit-learn = "^1.4.2"
+
+
+[[tool.poetry.source]]
+name = "nvidia"
+url = "https://download.pytorch.org/whl/cu118"
+priority = "supplemental"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
