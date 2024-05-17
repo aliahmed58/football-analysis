@@ -2,7 +2,8 @@ venv/
 weights/
 *.pt
 **/generated_models/two_pix2pix/
-
+out/
+videos/
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

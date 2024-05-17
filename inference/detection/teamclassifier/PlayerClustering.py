@@ -29,6 +29,7 @@ class KmeansTeamClassifier:
         samples = self.extract_training_samples(image_data, object_detector, court_detector)
 
         color_training_samples = self.extract_color_features(samples)
+        print(color_training_samples)
         self.train(color_training_samples)
 
     @staticmethod

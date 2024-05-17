@@ -35,13 +35,13 @@ def generate_frames(video_file_path: str) -> Generator[np.ndarray, None, None]:
 # OpenCV video writer which is used to draw on frames and
 # then output that to our video with detections
 # -------------------------------------------------------
-def get_video_writer(output_video_path: str, config: Dict) -> cv2.VideoWriter:
+def get_video_writer(output_video_path: str, frame_size: tuple) -> cv2.VideoWriter:
     
     return cv2.VideoWriter(
         output_video_path, 
         fourcc=cv2.VideoWriter_fourcc(*'mp4v'),
-        fps=30,
-        frameSize=(1280, 720),
+        fps=60,
+        frameSize=frame_size,
         isColor=True
     )
 

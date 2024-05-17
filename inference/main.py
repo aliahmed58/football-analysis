@@ -14,7 +14,7 @@ from detection.yolo_detector import YoloDetector
 from detection.gameanalytics.GameAnalytics import GameAnalytics
 
 def detect(): 
-
+    
     # Create necessary detection objects
     court_detector: CourtDetector = CourtDetector(output_resolution=(1920, 1080))
     camera_estimator: CameraEstimator = CameraEstimator(output_resolution=(1920, 1080))
@@ -37,18 +37,17 @@ def detect():
 
     # output video writer
     output_video_path: str = f'{util.get_project_root()}/{config.OUTPUT_DIR_NAME}/{config.INPUT_VIDEO_NAME}'
-    video_writer: cv2.VideoWriter = video.get_video_writer(output_video_path, None) 
-    map2d = video.get_video_writer('map.mp4', None)
+    video_writer: cv2.VideoWriter = video.get_video_writer(output_video_path, (1920, 1080)) 
+    map2d = video.get_video_writer('map.mp4', (920, 592))
 
     frame_index: int = 0
     for frame in frame_iterator:
-        # print(f'Processing {frame_index} - frame')
-        
+        print(f'Processing {frame_index} - frame')
 
         drawn_frame: np.ndarray = frame.copy()
         masked_court_image, masked_edge_image = court_detector.get_masked_and_edge_court(drawn_frame)
 
-        player_boxes, ball_boxes = object_detector.detect(frame, team_classifier)
+        player_boxes, ball_boxes = object_detector.detect(masked_court_image, team_classifier)
 
         # get the estimated edge map
         estimated_edge_map = estimate(camera_estimator, masked_edge_image)
@@ -72,10 +71,10 @@ def detect():
         )
         
         analysis.update(camera_estimator.last_estimated_homography, player_boxes + ball_boxes)
-        top_view_with_board = analysis.get_analytics()
-
-        # video_writer.write(output_frame)
-        video_writer.write(top_view_with_board)
+        top_view_frame = analysis.get_analytics()
+    
+        video_writer.write(output_frame)
+        map2d.write(top_view_frame)
 
         frame_index += 1
     

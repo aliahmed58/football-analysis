@@ -17,6 +17,7 @@ class GameAnalytics:
     RIGHT = 'right'
     LEFT = 'left'
     color_names = {
+        (255, 255, 255): 'White',
         (155, 155, 155): 'No',
         (255, 0, 0): 'Blue',
         (0, 0, 255): 'Red',
@@ -51,20 +52,21 @@ class GameAnalytics:
 
         ball_points = filter(lambda x: x.color == (255, 255, 255), self.current_points)
         self.ball_history.extend([p.coords for p in ball_points])
-
-    # @utils.logging_time
-    def get_analytics(self):
-        info_board = self.get_info_board()
-        top_view_frame = self.get_top_view()
+        
         # TODO Get different goal keepers as well and keep colors dynamic
         player_points = filter(lambda x: x.color != (255, 255, 255), self.current_points)
+        self._find_ball_possession()
 
         # keep appending the x, y coordinates with frame number to a list so it can be saved as csv later 
         # list -> dataframe -> csv
         self._append_rows_to_list(player_points, self.player_list)
 
         self.frame += 1
-        return np.concatenate([top_view_frame, info_board], axis=0)
+
+    # @utils.logging_time
+    def get_analytics(self):
+        top_view_frame = self.get_top_view()
+        return top_view_frame
 
     def get_top_view(self):
         return self.top_viewer.project_on_topview(self.current_points, self.ball_history)
@@ -88,26 +90,15 @@ class GameAnalytics:
 
         self.ball_point = np.array(ball_points[0].coords)
 
-        for p in player_points:
-            player_point = np.array(p.coords)
-            dist = norm(self.ball_point - player_point)
-            if dist < self.possession_radius:
-                self.color_team_in_possession = p.color
-                p.possession = 1
-                print('possession set: ', p.possession)
-                # if (dist(self.posession_last_points - self.ball_point) > some_threshold):
-                    # consider it a pass and add to a pass network :D
-                # check if the last ball point in possession and current has a difference of some threshold
-                if self.possession_last_point is None or np.any(self.possession_last_point <= 0):
-                    self.possession_last_point = self.ball_point
+        for b in ball_points:
+            b_point = np.array(b.coords)
+            for p in player_points:
+                player_point = np.array(p.coords)
+                dist = norm(b_point - player_point)
+                if dist < self.possession_radius + 10:
+                    self.color_team_in_possession = p.color
                     p.possession = 1
                     break
-                else:
-                    pass_dist = norm(self.ball_point - self.possession_last_point)
-                    if pass_dist >= 100:
-                        # count as a pass - either to opponent or within 
-                        pass   
-                break
 
     def _find_semantics(self):
         self.semantics = '-'
@@ -166,7 +157,6 @@ class GameAnalytics:
             image_data, team_classifier, object_detector, court_detector, camera_estimator)
         
         team_colors = team_classifier.colors
-
         groups = self._get_all_team_groups(topview_points, team_colors)
         groups, soccer_team_a, soccer_team_b = self._get_soccer_team_groups(groups)
 
@@ -235,13 +225,13 @@ class GameAnalytics:
         x_scaled = ((x) / (920)) * (120)
         y_scaled = ((y) / (592)) * (80)
 
-        return x_scaled, y_scaled
+        return int(x_scaled), int(y_scaled)
     
 
     def _append_rows_to_list(self, rows, data_list):
         for point in rows:
             dict1: dict = {}
-            x_scaled, y_scaled = point.coords[0], point.coords[1]
+            x_scaled, y_scaled = self._scale_coordinates(point.coords[0], point.coords[1])
             dict1.update({
                 'teamId': self.color_names.get(point.color, "Undefined"),
                 'frame': self.frame,
