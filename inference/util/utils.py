@@ -1,4 +1,5 @@
 import os
+from . import config
 import numpy as np
 import scipy.io as sio
 from PIL import Image
@@ -29,10 +30,15 @@ def get_two_pix2pix_model_path() -> str:
     return f'{get_project_root()}/mlmodels/generated_models/two_pix2pix/'
 
 
-def create_dir_if_not_exists(dirpath: str) -> None:
-    if os.path.exists(dirpath):
+# creates the output directory and returns the path as string
+def create_output_dir() -> str:
+    no_of_dirs = len(os.listdir(f'{get_project_root()}/{config.OUTPUT_DIR_NAME}/'))
+    mkdirpath = f'{get_project_root()}/{config.OUTPUT_DIR_NAME}/run-{no_of_dirs + 1}'
+    if os.path.exists(mkdirpath):
         return
-    os.makedirs(dirpath)
+    os.makedirs(mkdirpath)
+    
+    return mkdirpath
 
 def tensor2im(image_tensor, imtype=np.uint8):
     image_numpy = image_tensor[0].cpu().float().numpy()

@@ -23,6 +23,8 @@ ultralytics = "^8.2.15"
 requests = "^2.31.0"
 pyflann-py3 = "^0.1.0"
 scikit-learn = "^1.4.2"
+celery = "^5.4.0"
+flask = "^3.0.3"
 
 
 [[tool.poetry.source]]

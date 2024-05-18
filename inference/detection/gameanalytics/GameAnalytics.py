@@ -1,5 +1,6 @@
 import cv2
 import numpy as np
+import datetime
 from numpy.linalg import norm
 from sklearn.linear_model import LogisticRegression
 import queue
@@ -26,7 +27,8 @@ class GameAnalytics:
         (255, 0, 255): 'Purple'
     }
 
-    def __init__(self):
+    def __init__(self, vid_fps: int):
+        self.fps = vid_fps
         self.player_list = []
         self.ball_list = []
         self.pass_list = []
@@ -45,6 +47,7 @@ class GameAnalytics:
         self.history_size = 100
         self.ball_history = queue.deque(maxlen=self.history_size)
         self.frame = 0
+        self.start_time = datetime.datetime.now()
 
     # @utils.logging_time
     def update(self, homography, boxes):
@@ -66,7 +69,9 @@ class GameAnalytics:
     # @utils.logging_time
     def get_analytics(self):
         top_view_frame = self.get_top_view()
-        return top_view_frame
+        info_board = self._get_analytics_board()
+        
+        return np.concatenate([top_view_frame, info_board], axis = 0)
 
     def get_top_view(self):
         return self.top_viewer.project_on_topview(self.current_points, self.ball_history)
@@ -76,9 +81,9 @@ class GameAnalytics:
         self._find_semantics()
         return self._get_analytics_board()
 
-    def save_coords_data(self, out_list: list, name: str) -> None:
+    def save_coords_data(self, out_list: list, out_path: str) -> None:
         df = pd.DataFrame(out_list)
-        df.to_csv(f'{utils.get_project_root()}/out/{name}', index=False)
+        df.to_csv(out_path, index=False)
 
     def _find_ball_possession(self):
         ball_points = self._get_current_ball_point()
@@ -232,11 +237,14 @@ class GameAnalytics:
         for point in rows:
             dict1: dict = {}
             x_scaled, y_scaled = self._scale_coordinates(point.coords[0], point.coords[1])
+            t = datetime.datetime.now() - self.start_time
+            actual_time = t.seconds / self.fps
             dict1.update({
                 'teamId': self.color_names.get(point.color, "Undefined"),
                 'frame': self.frame,
                 'x': x_scaled,
                 'y': y_scaled,
-                'ball_posession': point.possession
+                'ball_posession': point.possession,
+                'timestamp': actual_time
             })
             data_list.append(dict1)
