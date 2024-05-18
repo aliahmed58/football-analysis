@@ -1,8 +1,8 @@
 import torch
 import inference.cvdetection as cvdetection
 from typing import List
-from detection.teamdetector.BoundingBox import PlayerBoundingBox
-import util.utils as util
+from inference.detection.teamdetector.BoundingBox import PlayerBoundingBox
+import inference.util.utils as util
 
 class YoloDetector:
 

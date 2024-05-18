@@ -1,17 +1,17 @@
-from video import VideoHandler
-import cvdetection as cvdetection
+from inference.video import VideoHandler
+import inference.cvdetection as cvdetection
 import cv2
 import torch
 import numpy as np
 import inference.util.utils as util
 import inference.util.config as config
-from typing import Generator, List
-from detection.court_detector import CourtDetector
-from detection.cameraestimator.CameraEstimator import CameraEstimator, estimate
-from detection.teamclassifier.PlayerClustering import ColorHistogramClassifier
-from detection.teamdetector.TeamDetector import TeamDetector
-from detection.yolo_detector import YoloDetector
-from detection.gameanalytics.GameAnalytics import GameAnalytics
+from typing import Generator
+from inference.detection.court_detector import CourtDetector
+from inference.detection.cameraestimator.CameraEstimator import CameraEstimator, estimate
+from inference.detection.teamclassifier.PlayerClustering import ColorHistogramClassifier
+from inference.detection.teamdetector.TeamDetector import TeamDetector
+from inference.detection.yolo_detector import YoloDetector
+from inference.detection.gameanalytics.GameAnalytics import GameAnalytics
 
 def detect(input_video_path: str): 
     
@@ -84,9 +84,6 @@ def detect(input_video_path: str):
         analysis.update(camera_estimator.last_estimated_homography, player_boxes + ball_boxes)
         top_view_frame = analysis.get_analytics()
         
-        # top_view_frame = cv2.resize(top_view_frame, (920, 1080))
-        # output_frame = np.concatenate([output_frame, top_view_frame], axis=1)
-        
         video_writer.write(output_frame)
         map2d.write(top_view_frame)
         frame_index += 1
@@ -98,4 +95,4 @@ def detect(input_video_path: str):
 
 
 if __name__ == '__main__':
-    detect(input_video_path='./videos/test.mp4')
+    detect(input_video_path='./videos/fifa.mp4')

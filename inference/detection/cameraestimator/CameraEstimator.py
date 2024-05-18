@@ -11,7 +11,7 @@ from inference.mlmodels.siamese.Siamese import Siamese
 from inference.detection.cameraestimator.Camera import Camera, edge_map_from_homography
 from inference.detection.cameraestimator.CameraObject import CameraObject
 from inference.detection.cameraestimator.CameraTracker import ECCCameraTracker, OpticalCameraTracker
-from util import utils
+from inference.util import utils
 
 
 # @utils.logging_time

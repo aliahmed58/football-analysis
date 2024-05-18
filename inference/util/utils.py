@@ -5,7 +5,7 @@ import scipy.io as sio
 from PIL import Image
 from typing import List
 from pathlib import Path
-from cvdetection import Detection
+from inference.cvdetection import Detection
 from inference.detection.teamdetector.BoundingBox import PlayerBoundingBox
 
 # ----------------------------------------------

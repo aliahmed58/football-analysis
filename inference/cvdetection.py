@@ -1,9 +1,9 @@
 import numpy as np
-import video
+import inference.video as video
 from typing import Dict, List, Tuple
-from util.containers import Rect, Color
+from inference.util.containers import Rect, Color
 from dataclasses import dataclass
-from detection.teamdetector.BoundingBox import PlayerBoundingBox
+from inference.detection.teamdetector.BoundingBox import PlayerBoundingBox
 
 # ----------------------------------------------------
 # Basic yolo detection module for players, balls etc

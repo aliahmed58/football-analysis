@@ -1,5 +1,4 @@
 import cv2
-from util import utils
 
 def get_frames_from_video(video_file, num_of_frames):
     video_handler = VideoHandler(file=video_file, output_resolution=(1920, 1080))

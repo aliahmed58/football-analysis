@@ -1,6 +1,5 @@
 import numpy as np
 import cv2
-from util import utils
 
 
 def edge_map_from_homography(homography, binary_court, edge_map_resolution):

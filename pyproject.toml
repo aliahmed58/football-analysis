@@ -25,6 +25,7 @@ pyflann-py3 = "^0.1.0"
 scikit-learn = "^1.4.2"
 celery = "^5.4.0"
 flask = "^3.0.3"
+redis = "^5.0.4"
 
 
 [[tool.poetry.source]]

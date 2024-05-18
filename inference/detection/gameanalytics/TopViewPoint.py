@@ -1,7 +1,5 @@
 import numpy as np
 
-from util import utils
-
 
 class TopViewPoint:
 

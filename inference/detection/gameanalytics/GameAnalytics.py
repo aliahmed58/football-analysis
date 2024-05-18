@@ -6,12 +6,12 @@ from sklearn.linear_model import LogisticRegression
 import queue
 import pandas as pd
 
-from detection.cameraestimator.CameraEstimator import estimate
+from inference.detection.cameraestimator.CameraEstimator import estimate
 from .TopView import TopViewer
 
 
-from util.video_handling import get_frames_from_video
-from util import utils
+from inference.util.video_handling import get_frames_from_video
+from inference.util import utils
 
 
 class GameAnalytics:
@@ -47,7 +47,7 @@ class GameAnalytics:
         self.history_size = 100
         self.ball_history = queue.deque(maxlen=self.history_size)
         self.frame = 0
-        self.start_time = datetime.datetime.now()
+        self.start_time = None
 
     # @utils.logging_time
     def update(self, homography, boxes):
@@ -234,6 +234,8 @@ class GameAnalytics:
     
 
     def _append_rows_to_list(self, rows, data_list):
+        if self.start_time is None:
+            self.start_time = datetime.datetime.now()
         for point in rows:
             dict1: dict = {}
             x_scaled, y_scaled = self._scale_coordinates(point.coords[0], point.coords[1])

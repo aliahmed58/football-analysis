@@ -3,8 +3,8 @@ import numpy as np
 from sklearn.cluster import KMeans
 from sklearn.preprocessing import normalize
 
-from util import utils, image_process
-from util.video_handling import get_frames_from_video
+from inference.util import utils, image_process
+from inference.util.video_handling import get_frames_from_video
 
 
 class KmeansTeamClassifier:

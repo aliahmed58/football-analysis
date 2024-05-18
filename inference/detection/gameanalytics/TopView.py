@@ -2,9 +2,9 @@ import cv2
 import numpy as np
 
 from .TopViewPoint import TopViewPoint
-from detection.cameraestimator.Camera import Camera
+from inference.detection.cameraestimator.Camera import Camera
 
-from util import utils
+from inference.util import utils
 
 
 class TopViewer:

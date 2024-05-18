@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 
 from inference.detection.cameraestimator.Camera import edge_map_from_homography
-from util import utils
+from inference.util import utils
 
 
 class CameraObject:

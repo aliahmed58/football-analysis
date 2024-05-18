@@ -46,7 +46,7 @@ def create_app(test_config=None):
 
     celery_init_app(app)
 
-    from . import detectbp
-    app.register_blueprint(detectbp.bp)
+    from . import pipelinebp
+    app.register_blueprint(pipelinebp.bp)
 
     return app

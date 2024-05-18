@@ -1,0 +1,14 @@
+[tool.poetry]
+name = "api"
+version = "0.1.0"
+description = "flask api with celery for the inference module"
+authors = ["aliahmed58"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.9"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

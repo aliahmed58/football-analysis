@@ -3,7 +3,6 @@ import numpy as np
 
 from inference.detection.cameraestimator.CameraObject import CameraObject
 from inference.detection.cameraestimator.Camera import edge_map_from_homography
-from util import utils
 
 class CameraTracker(CameraObject):
     def track_camera(self, detected_edge_map, last_estimated_homography):

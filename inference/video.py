@@ -1,8 +1,7 @@
 import cv2
 import numpy as np
-import os
 from typing import Generator, Dict
-from util.containers import Rect, Color
+from inference.util.containers import Rect, Color
 
 # -------------------------------------------------------
 # All useful methods related to video handling such as
