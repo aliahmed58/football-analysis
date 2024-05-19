@@ -7,10 +7,10 @@ name = "inference"
 version = "0.1.0"
 description = "Detection and 2D mapping module for football analysis on videos"
 authors = ["Your Name <you@example.com>"]
-readme = "README.md"
+readme = "Readme.md"
 
 [tool.poetry.dependencies]
-python = "3.9"
+python = "3.9.18"
 numpy = "1.24.1"
 matplotlib = "^3.7.5"
 scipy = "1.10.1"
@@ -26,6 +26,8 @@ scikit-learn = "^1.4.2"
 celery = "^5.4.0"
 flask = "^3.0.3"
 redis = "^5.0.4"
+sqlalchemy = "^2.0.30"
+cloud-sql-python-connector = {extras = ["pymysql"], version = "^1.9.2"}
 
 
 [[tool.poetry.source]]

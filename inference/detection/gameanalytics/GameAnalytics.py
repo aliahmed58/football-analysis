@@ -27,8 +27,9 @@ class GameAnalytics:
         (255, 0, 255): 'Purple'
     }
 
-    def __init__(self, vid_fps: int):
+    def __init__(self, vid_fps: int, task_id: str):
         self.fps = vid_fps
+        self.task_id = task_id
         self.player_list = []
         self.ball_list = []
         self.pass_list = []
@@ -242,11 +243,12 @@ class GameAnalytics:
             t = datetime.datetime.now() - self.start_time
             actual_time = t.seconds / self.fps
             dict1.update({
+                'id': self.task_id,
                 'teamId': self.color_names.get(point.color, "Undefined"),
                 'frame': self.frame,
                 'x': x_scaled,
                 'y': y_scaled,
                 'ball_posession': point.possession,
-                'timestamp': actual_time
+                'timestamp': round(actual_time, 2)
             })
             data_list.append(dict1)

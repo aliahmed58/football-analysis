@@ -1,11 +1,13 @@
 from inference.video import VideoHandler
 import inference.cvdetection as cvdetection
 import cv2
-import torch
 import numpy as np
+import sqlalchemy as sa
 import inference.util.utils as util
 import inference.util.config as config
+import inference.persist as db
 from typing import Generator
+from torch.multiprocessing import set_start_method
 from inference.detection.court_detector import CourtDetector
 from inference.detection.cameraestimator.CameraEstimator import CameraEstimator, estimate
 from inference.detection.teamclassifier.PlayerClustering import ColorHistogramClassifier
@@ -13,16 +15,18 @@ from inference.detection.teamdetector.TeamDetector import TeamDetector
 from inference.detection.yolo_detector import YoloDetector
 from inference.detection.gameanalytics.GameAnalytics import GameAnalytics
 
-def detect(input_video_path: str): 
+engine: sa.Engine = db.get_engine()
+
+def detect(input_video_path: str, task_id: str): 
     
     # Create necessary detection objects
     court_detector: CourtDetector = CourtDetector(output_resolution=(1920, 1080))
     camera_estimator: CameraEstimator = CameraEstimator(output_resolution=(1920, 1080))
     
+    object_detector: YoloDetector = YoloDetector() 
+    
     team_classifier: ColorHistogramClassifier = ColorHistogramClassifier(num_of_teams=3)
-    
-    object_detector: YoloDetector = YoloDetector()
-    
+        
     team_detector: TeamDetector = TeamDetector(None, None)
     
     team_classifier.initialize_using_video(
@@ -34,7 +38,7 @@ def detect(input_video_path: str):
     # Create an instance of video handler
     video_handler: VideoHandler = VideoHandler(input_video_path)
 
-    analysis: GameAnalytics = GameAnalytics(video_handler.video_fps)
+    analysis: GameAnalytics = GameAnalytics(video_handler.video_fps, task_id)
     analysis.infer_team_sides(
         input_video_path, court_detector, 
         object_detector, team_classifier, 
@@ -90,9 +94,15 @@ def detect(input_video_path: str):
     
     analysis.save_coords_data(analysis.player_list,
                               f'{output_video_path}/players.csv')
+    
+    db.save_list_to_sql(analysis.player_list, engine)
+
+    # dispose off resources
+    engine.dispose()
     video_writer.release()
     map2d.release()
+    del object_detector
 
 
 if __name__ == '__main__':
-    detect(input_video_path='./videos/fifa.mp4')
+    detect(input_video_path='./videos/fifa.mp4', task_id='1')

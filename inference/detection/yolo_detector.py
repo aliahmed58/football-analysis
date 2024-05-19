@@ -7,7 +7,10 @@ import inference.util.utils as util
 class YoloDetector:
 
     def __init__(self) -> None:
-        self.model = torch.hub.load('ultralytics/yolov5', 'custom', 'weights/best.pt',device=0, force_reload=True)
+        torch.multiprocessing.set_start_method('spawn')
+        self.model = torch.hub.load('ultralytics/yolov5', 'custom', 
+                                    f'{util.get_project_root()}/weights/best.pt', device=0, 
+                                    force_reload=True)
 
     def detect(self, frame, team_classifier):
         # do detections

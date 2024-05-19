@@ -84,8 +84,11 @@ class VideoHandler:
         self.fps.update()
         self.frame_count += 1
         self.timestamp = self.timestamp + 1000 / self.fps.fps()
-        return cv2.resize(self.current_frame, self.output_resolution)
-
+        try:
+            return cv2.resize(self.current_frame, self.output_resolution)
+        except Exception as e:
+             print(str(e))
+            
     def _record(self, frame):
         self.output_video_stream.write(frame)
 

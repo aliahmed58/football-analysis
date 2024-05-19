@@ -4,6 +4,8 @@ weights/
 **/generated_models/two_pix2pix/
 out/
 videos/
+dbkeys.py
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

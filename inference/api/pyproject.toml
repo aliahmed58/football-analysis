@@ -3,7 +3,7 @@ name = "api"
 version = "0.1.0"
 description = "flask api with celery for the inference module"
 authors = ["aliahmed58"]
-readme = "README.md"
+readme = "Readme.md"
 
 [tool.poetry.dependencies]
 python = "^3.9"
