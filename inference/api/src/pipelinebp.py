@@ -9,7 +9,7 @@ from inference.api.src import tasks
 def hello_world():
     return "<h1> Hello world </h1>"
 
-@bp.route('/', methods=['GET'])
+@bp.route('/infer', methods=['GET'])
 def detect():
     results = tasks.infer_footage.delay()
     return {'result_id': results.id}

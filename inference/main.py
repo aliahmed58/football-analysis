@@ -1,11 +1,9 @@
 from inference.video import VideoHandler
 import inference.cvdetection as cvdetection
 import cv2
-import torch
 import numpy as np
 import sqlalchemy as sa
 import inference.util.utils as util
-import inference.util.config as config
 import inference.persistance.persist as db
 from typing import Generator
 from torch.multiprocessing import set_start_method
@@ -19,7 +17,7 @@ from inference.detection.gameanalytics.GameAnalytics import GameAnalytics
 engine: sa.Engine = db.get_engine()
 object_detector = None
 
-def detect(input_video_path: str, task_id: str): 
+def detect(input_video_path: str, task_id: str, save_to_db=True): 
     
     # Create necessary detection objects
     court_detector: CourtDetector = CourtDetector(output_resolution=(1920, 1080))
@@ -62,9 +60,7 @@ def detect(input_video_path: str, task_id: str):
     frame_index: int = 0
     for frame in frame_iterator:
         print(f'Processing {frame_index} - frame')
-        if frame_index >= 15:
-            break
-
+        
         drawn_frame: np.ndarray = frame.copy()
         masked_court_image, masked_edge_image = court_detector.get_masked_and_edge_court(drawn_frame)
 
@@ -100,8 +96,8 @@ def detect(input_video_path: str, task_id: str):
     
     analysis.save_coords_data(analysis.player_list,
                               f'{output_video_path}/players.csv')
-    
-    # db.save_list_to_sql(analysis.player_list, engine)
+    if save_to_db:
+        db.save_list_to_sql(analysis.player_list, engine)
 
     # dispose off resources
     video_writer.release()
