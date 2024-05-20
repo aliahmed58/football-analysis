@@ -48,7 +48,7 @@ class VideoHandler:
         
         return cv2.VideoWriter(
             output_video_path, 
-            fourcc=cv2.VideoWriter_fourcc(*'mp4v'),
+            fourcc=cv2.VideoWriter_fourcc(*'vp80'),
             fps=self.video_fps,
             frameSize=frame_size,
             isColor=True

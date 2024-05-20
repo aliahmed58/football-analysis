@@ -3,7 +3,7 @@ from celery.result import AsyncResult
 
 bp = Blueprint('detection', __name__, url_prefix='/')
 
-from . import tasks
+from inference.api.src import tasks
 
 @bp.route('/hello', methods=['GET'])
 def hello_world():

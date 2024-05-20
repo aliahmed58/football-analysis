@@ -31,9 +31,8 @@ def get_two_pix2pix_model_path() -> str:
 
 
 # creates the output directory and returns the path as string
-def create_output_dir() -> str:
-    no_of_dirs = len(os.listdir(f'{get_project_root()}/{config.OUTPUT_DIR_NAME}/'))
-    mkdirpath = f'{get_project_root()}/{config.OUTPUT_DIR_NAME}/run-{no_of_dirs + 1}'
+def create_output_dir(uid: str) -> str:
+    mkdirpath = f'{get_project_root()}/{config.OUTPUT_DIR_NAME}/{uid}'
     if os.path.exists(mkdirpath):
         return
     os.makedirs(mkdirpath)

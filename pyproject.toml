@@ -28,6 +28,7 @@ flask = "^3.0.3"
 redis = "^5.0.4"
 sqlalchemy = "^2.0.30"
 cloud-sql-python-connector = {extras = ["pymysql"], version = "^1.9.2"}
+firebase-admin = "^6.5.0"
 
 
 [[tool.poetry.source]]

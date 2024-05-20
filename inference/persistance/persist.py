@@ -1,7 +1,7 @@
 import sqlalchemy as sa
 from google.cloud.sql.connector import Connector
 # db keys should be created with your own configurations
-from dbkeys import *
+from .dbkeys import *
 import pandas as pd
 
 def get_cloud_conn():
@@ -34,4 +34,15 @@ def save_list_to_sql(data: list, engine: sa.Engine) -> bool:
     except Exception as e:
         print(str(e))
         print('Failed whlie saving data to database')
-    
+
+# Tests
+
+def test_save_list_to_sql():
+    data_list = [
+        {"A": 1, "B": 2}
+    ]    
+    engine: sa.Engine = get_engine()
+    save_list_to_sql(data_list, engine)
+
+if __name__ == '__main__':
+    test_save_list_to_sql()    

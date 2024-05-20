@@ -1,11 +1,12 @@
 from inference.video import VideoHandler
 import inference.cvdetection as cvdetection
 import cv2
+import torch
 import numpy as np
 import sqlalchemy as sa
 import inference.util.utils as util
 import inference.util.config as config
-import inference.persist as db
+import inference.persistance.persist as db
 from typing import Generator
 from torch.multiprocessing import set_start_method
 from inference.detection.court_detector import CourtDetector
@@ -16,6 +17,7 @@ from inference.detection.yolo_detector import YoloDetector
 from inference.detection.gameanalytics.GameAnalytics import GameAnalytics
 
 engine: sa.Engine = db.get_engine()
+object_detector = None
 
 def detect(input_video_path: str, task_id: str): 
     
@@ -23,7 +25,9 @@ def detect(input_video_path: str, task_id: str):
     court_detector: CourtDetector = CourtDetector(output_resolution=(1920, 1080))
     camera_estimator: CameraEstimator = CameraEstimator(output_resolution=(1920, 1080))
     
-    object_detector: YoloDetector = YoloDetector() 
+    global object_detector
+    if object_detector is None:
+        object_detector = YoloDetector() 
     
     team_classifier: ColorHistogramClassifier = ColorHistogramClassifier(num_of_teams=3)
         
@@ -50,14 +54,16 @@ def detect(input_video_path: str, task_id: str):
     frame_iterator: Generator[np.ndarray, None, None] = iter(video_handler.generate_frames())
 
     # output video path 
-    output_video_path: str = util.create_output_dir() 
+    output_video_path: str = util.create_output_dir(task_id) 
     
-    video_writer: cv2.VideoWriter = video_handler.get_video_writer(f'{output_video_path}/{config.INPUT_VIDEO_NAME}', (1920, 1080)) 
-    map2d = video_handler.get_video_writer(f'{output_video_path}/map.mp4', (920, 720))
+    video_writer: cv2.VideoWriter = video_handler.get_video_writer(f'{output_video_path}/detection.webm', (1920, 1080)) 
+    map2d = video_handler.get_video_writer(f'{output_video_path}/map.webm', (920, 720))
 
     frame_index: int = 0
     for frame in frame_iterator:
         print(f'Processing {frame_index} - frame')
+        if frame_index >= 15:
+            break
 
         drawn_frame: np.ndarray = frame.copy()
         masked_court_image, masked_edge_image = court_detector.get_masked_and_edge_court(drawn_frame)
@@ -95,14 +101,22 @@ def detect(input_video_path: str, task_id: str):
     analysis.save_coords_data(analysis.player_list,
                               f'{output_video_path}/players.csv')
     
-    db.save_list_to_sql(analysis.player_list, engine)
+    # db.save_list_to_sql(analysis.player_list, engine)
 
     # dispose off resources
-    engine.dispose()
     video_writer.release()
     map2d.release()
-    del object_detector
+
+    return True
 
 
 if __name__ == '__main__':
-    detect(input_video_path='./videos/fifa.mp4', task_id='1')
+    from inference.firebase import firestore
+    task_id: str = 'manual-run'
+    detect(input_video_path='./videos/fifa.mp4', task_id=task_id)
+    detection_url = firestore.upload_file_to_firebase(f'out/manual-run/detection.webm', 'detection.webm', task_id)
+    map_url = firestore.upload_file_to_firebase(f'out/manual-run/map.webm', 'map.webm', task_id)
+    print(
+        map_url, detection_url,
+        end='\n'
+    )
