@@ -72,6 +72,8 @@ In the main file provide the video file path and task id to the `detect` functio
 
 ## Inference with web server (Flask + Celery)
 
+Make sure redis is installed and running since Celery makes use of reddit. Celery is not supported on windows with the version in this project.
+
 To run it as a server that handles tasks on API endpoints listed above, do the following:
 
 1. Open a terminal in `inference/api` and run celery by the command:
