@@ -4,7 +4,6 @@ import cv2
 import numpy as np
 import sqlalchemy as sa
 import inference.util.utils as util
-import inference.persistance.persist as db
 from typing import Generator
 from torch.multiprocessing import set_start_method
 from inference.detection.court_detector import CourtDetector
@@ -14,7 +13,6 @@ from inference.detection.teamdetector.TeamDetector import TeamDetector
 from inference.detection.yolo_detector import YoloDetector
 from inference.detection.gameanalytics.GameAnalytics import GameAnalytics
 
-engine: sa.Engine = db.get_engine()
 object_detector = None
 
 def detect(input_video_path: str, task_id: str, save_to_db=True): 
@@ -96,14 +94,12 @@ def detect(input_video_path: str, task_id: str, save_to_db=True):
     
     analysis.save_coords_data(analysis.player_list,
                               f'{output_video_path}/players.csv')
-    if save_to_db:
-        db.save_list_to_sql(analysis.player_list, engine)
 
     # dispose off resources
     video_writer.release()
     map2d.release()
 
-    return True
+    return analysis.player_list
 
 
 if __name__ == '__main__':

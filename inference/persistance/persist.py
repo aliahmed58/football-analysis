@@ -1,8 +1,9 @@
 import sqlalchemy as sa
 from google.cloud.sql.connector import Connector
 # db keys should be created with your own configurations
-from .dbkeys import *
+from inference.persistance.dbkeys import *
 import pandas as pd
+import traceback
 
 def get_cloud_conn():
     connector = Connector()
@@ -32,7 +33,7 @@ def save_list_to_sql(data: list, engine: sa.Engine) -> bool:
         if_exists='append'
         )
     except Exception as e:
-        print(str(e))
+        print(traceback.format_exc())
         print('Failed whlie saving data to database')
 
 # Tests

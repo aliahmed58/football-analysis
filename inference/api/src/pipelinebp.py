@@ -1,4 +1,4 @@
-from flask import Blueprint, redirect
+from flask import Blueprint, request
 from celery.result import AsyncResult
 
 bp = Blueprint('detection', __name__, url_prefix='/')
@@ -9,9 +9,9 @@ from inference.api.src import tasks
 def hello_world():
     return "<h1> Hello world </h1>"
 
-@bp.route('/infer', methods=['GET'])
-def detect():
-    results = tasks.infer_footage.delay()
+@bp.route('/infer/<video_id>', methods=['GET'])
+def detect(video_id: str):
+    results = tasks.infer_footage.delay(video_id)
     return {'result_id': results.id}
 
 @bp.get("/result/<id>")
