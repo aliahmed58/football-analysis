@@ -1,5 +1,6 @@
 import os
 from flask import Flask
+from flask_cors import CORS, cross_origin
 from celery import Celery, Task
 
 def celery_init_app(app: Flask) -> Celery:
@@ -49,4 +50,5 @@ def create_app(test_config=None):
     from . import pipelinebp
     app.register_blueprint(pipelinebp.bp)
 
+    CORS(app)
     return app
