@@ -46,4 +46,6 @@ def test_save_list_to_sql():
     save_list_to_sql(data_list, engine)
 
 if __name__ == '__main__':
-    test_save_list_to_sql()    
+    df = pd.read_csv('../out/4de6fcdc-5850-41e8-8e22-bf2dec5c8559/players.csv')
+    df.to_sql('Test', con=get_engine(), if_exists='append')
+    

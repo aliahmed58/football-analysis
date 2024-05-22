@@ -4,6 +4,7 @@ import cv2
 import numpy as np
 import sqlalchemy as sa
 import inference.util.utils as util
+import inference.persistance.persist as db
 from typing import Generator
 from torch.multiprocessing import set_start_method
 from inference.detection.court_detector import CourtDetector
@@ -14,6 +15,7 @@ from inference.detection.yolo_detector import YoloDetector
 from inference.detection.gameanalytics.GameAnalytics import GameAnalytics
 
 object_detector = None
+engine: sa.Engine = None
 
 def detect(input_video_path: str, task_id: str, save_to_db=True): 
     
@@ -21,6 +23,11 @@ def detect(input_video_path: str, task_id: str, save_to_db=True):
     court_detector: CourtDetector = CourtDetector(output_resolution=(1920, 1080))
     camera_estimator: CameraEstimator = CameraEstimator(output_resolution=(1920, 1080))
     
+    global engine
+    if engine is None:
+        engine = db.get_engine()
+
+
     global object_detector
     if object_detector is None:
         object_detector = YoloDetector() 
@@ -106,9 +113,9 @@ if __name__ == '__main__':
     from inference.firebase import firestore
     task_id: str = 'manual-run'
     detect(input_video_path='./videos/fifa.mp4', task_id=task_id)
-    detection_url = firestore.upload_file_to_firebase(f'out/manual-run/detection.webm', 'detection.webm', task_id)
-    map_url = firestore.upload_file_to_firebase(f'out/manual-run/map.webm', 'map.webm', task_id)
-    print(
-        map_url, detection_url,
-        end='\n'
-    )
+    # detection_url = firestore.upload_file_to_firebase(f'out/manual-run/detection.webm', 'detection.webm', task_id)
+    # map_url = firestore.upload_file_to_firebase(f'out/manual-run/map.webm', 'map.webm', task_id)
+    # print(
+    #     map_url, detection_url,
+    #     end='\n'
+    # )

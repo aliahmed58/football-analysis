@@ -94,7 +94,7 @@ class GameAnalytics:
         if len(ball_points) == 0:
             return
 
-        self.ball_point = np.array(ball_points[0].coords)
+        self.ball_point = ball_points[0]
 
         for b in ball_points:
             b_point = np.array(b.coords)
@@ -104,6 +104,7 @@ class GameAnalytics:
                 if dist < self.possession_radius + 10:
                     self.color_team_in_possession = p.color
                     p.possession = 1
+                    self.ball_point = b
                     break
 
     def _find_semantics(self):
@@ -240,6 +241,10 @@ class GameAnalytics:
         for point in rows:
             dict1: dict = {}
             x_scaled, y_scaled = self._scale_coordinates(point.coords[0], point.coords[1])
+            if self.ball_point is not None:
+                x_ball_scaled, y_ball_scaled = self._scale_coordinates(
+                    self.ball_point.coords[0], self.ball_point.coords[1]
+                )
             t = datetime.datetime.now() - self.start_time
             actual_time = t.seconds / self.fps
             dict1.update({
@@ -249,6 +254,8 @@ class GameAnalytics:
                 'x': x_scaled,
                 'y': y_scaled,
                 'ball_posession': point.possession,
-                'timestamp': round(actual_time, 2)
+                'timestamp': round(actual_time, 2),
+                'ball_x': x_ball_scaled,
+                'ball_y': y_ball_scaled
             })
             data_list.append(dict1)

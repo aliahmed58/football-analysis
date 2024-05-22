@@ -4,6 +4,8 @@ from celery import shared_task
 from inference.main import detect
 from inference.firebase import firestore
 from inference.util import utils
+from celery import states
+from celery.exceptions import Ignore
 
 @shared_task(ignore_result=False)
 def infer_footage(full_video_name):
@@ -16,6 +18,8 @@ def infer_footage(full_video_name):
     except Exception as e:
         print(traceback.format_exc())
         print('Could not find file on cloud, are you sure ID was correct.')
+        infer_footage.update_state(state=states.FAILURE)
+        raise Ignore()
 
     try:
         # start the inference method that does detection and extracts data
@@ -26,7 +30,7 @@ def infer_footage(full_video_name):
         # if it ran successfully, upload the output videos to firebase cloud storage
         if player_list:
 
-            engine = db.get_engine()
+            # engine = db.get_engine()
 
             # saved as webm so it can be easily 
             detection_vid_url = firestore.upload_file_to_firebase(
@@ -41,13 +45,15 @@ def infer_footage(full_video_name):
             )
 
             # save the list to sql
-            db.save_list_to_sql(player_list, engine)
+            # db.save_list_to_sql(player_list, engine)
 
             # dispose the engine
-            engine.dispose()
+            # engine.dispose()
 
             return [detection_vid_url, map_vid_url]
 
     except Exception as e:
         print('Exception occured ', e)
         print(traceback.format_exc())
+        infer_footage.update_state(state=states.FAILURE)
+        raise Ignore()
