@@ -12,7 +12,7 @@ Flask api with Celery and eventlet to handle background processing. The flask se
 
 List of endpoints:
 
- `host:port/infer/:<video_id>` 
+- `host:port/infer/:<video_id>` 
 
 _Request_: Sends a task to the server, video with the given unique video filename is fetched from firebase cloud storage under `uploads/` folder.
 
