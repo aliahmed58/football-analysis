@@ -78,7 +78,7 @@ To run it as a server that handles tasks on API endpoints listed above, do the f
 
 1. Open a terminal in `inference/api` and run celery by the command:
 ```
-celery -A make_celery worker --loglevel INFO -P eventlet -c 1000
+celery -A make_celery worker --loglevel INFO -P solo
 ```
 
 2. Open another terminal also in `inference/api` and run flask server by the command:
