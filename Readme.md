@@ -12,13 +12,13 @@ Flask api with Celery and eventlet to handle background processing. The flask se
 
 List of endpoints:
 
- `host:port/infer` 
+ `host:port/infer/:<video_id>` 
 
-_Request_: Sends a task to the server -- TODO: Add url param for video file path, currently hardcoded.
+_Request_: Sends a task to the server, video with the given unique video filename is fetched from firebase cloud storage under `uploads/` folder.
 
 _Response_: Sends back a result_id, that is the task unique id assigned to it
 
-- `host:port/result/<id>`
+- `host:port/result/:<id>`
 
 _Request_: Request the task status from the server providing the result_id given in `/infer` request.
 
@@ -26,6 +26,7 @@ _Response_: Return a json object with the following fields:
 - `ready: Boolean` - tells whether a task is completed or not
 - `successfull: Boolean` - tells whether the task completed successfully or failed
 - `value: Any` - Returns the list of public links annotated and 2d map video uploaded to firebase or False if task failed.
+- `status: 'FAILURE' or 'SUCCESS'` - Returns FAILURE if task is failed due to any error.
 
 
 # Setup
