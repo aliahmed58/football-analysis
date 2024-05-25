@@ -6,7 +6,15 @@ from inference.firebase import firestore
 from inference.util import utils
 from celery import states
 from celery.exceptions import Ignore
+from inference.eventdetection import infer
 
+# -----------------------------------------------------------
+# The celery task for handling player detection and mapping
+# the results to a 2d match + annotating the video. Then,
+# it uploads the annotated videos to firebase, processes 
+# output results and produces insights and saves that to a 
+# database on gcp. That data is consumed in a bi dashboard.
+# -----------------------------------------------------------
 @shared_task(ignore_result=False)
 def infer_footage(full_video_name):
     task_id = infer_footage.request.id
@@ -56,4 +64,43 @@ def infer_footage(full_video_name):
         print('Exception occured ', e)
         print(traceback.format_exc())
         infer_footage.update_state(state=states.FAILURE)
+        raise Ignore()
+    
+# -----------------------------------------------------------
+# The celery task for event detection, which runs on a video
+# and produces an annotated video showing which football
+# event is occuring on the current frame. This data is also
+# written to a csv file which will be uploaded to sql and 
+# the annotated video is uploaded to firebase to be accessed
+# by a react frontend. The value returned is the link after
+# task is completed successfuly.
+# -----------------------------------------------------------
+@shared_task(ignore_result=False)
+def event_detection(full_video_name):
+    task_id = event_detection.request.id
+    input_video = None
+    
+    # try downloading the uploaded video and see if it exists
+    try:
+        input_video = firestore.download_file(f'upload/{full_video_name}', 'videos')
+    except Exception as e:
+        print(traceback.format_exc())
+        print('Could not find file on cloud, are you sure ID was correct.')
+        infer_footage.update_state(state=states.FAILURE)
+        raise Ignore()
+    
+    try:
+        infer.video_classifier(input_video, task_id)
+        
+        video_url = firestore.upload_file_to_firebase(
+            f'{utils.get_project_root()}/out/{task_id}/events.webm',
+            'events.webm',
+            task_id
+        )
+
+        return video_url
+
+    except Exception as e:
+        print(traceback.format_exc())
+        event_detection.update_state(state=states.FAILURE)
         raise Ignore()
