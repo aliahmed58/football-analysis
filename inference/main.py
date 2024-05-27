@@ -17,7 +17,7 @@ from inference.detection.gameanalytics.GameAnalytics import GameAnalytics
 from inference.analysis import passing, possesion, pressure, receiving
 
 # object_detector = None
-engine: sa.Engine = None
+# engine: sa.Engine = None
 
 def detect(input_video_path: str, task_id: str, save_to_db=True): 
     
@@ -25,9 +25,9 @@ def detect(input_video_path: str, task_id: str, save_to_db=True):
     court_detector: CourtDetector = CourtDetector(output_resolution=(1920, 1080))
     camera_estimator: CameraEstimator = CameraEstimator(output_resolution=(1920, 1080))
     
-    global engine
-    if engine is None:
-        engine = db.get_engine()
+    # global engine
+    # if engine is None:
+    #     engine = db.get_engine()
 
 
     # global object_detector
@@ -124,7 +124,7 @@ def detect(input_video_path: str, task_id: str, save_to_db=True):
 
 
 if __name__ == '__main__':
-    engine = db.get_engine()
+    # engine = db.get_engine()
     # from inference.firebase import firestore
     task_id: str = 'manual-run'
     detect(input_video_path='./videos/test.mp4', task_id=task_id)
