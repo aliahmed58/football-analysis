@@ -126,22 +126,22 @@ def detect(input_video_path: str, task_id: str, save_to_db=True):
 if __name__ == '__main__':
     engine = db.get_engine()
     # from inference.firebase import firestore
-    # task_id: str = 'manual-run'
-    # detect(input_video_path='./videos/fifa.mp4', task_id=task_id)
+    task_id: str = 'manual-run'
+    detect(input_video_path='./videos/test.mp4', task_id=task_id)
     # detection_url = firestore.upload_file_to_firebase(f'out/manual-run/detection.webm', 'detection.webm', task_id)
     # map_url = firestore.upload_file_to_firebase(f'out/manual-run/map.webm', 'map.webm', task_id)
     # print(
     #     map_url, detection_url,
     #     end='\n'
     # )
-    file_path: str = f'{util.get_project_root()}/out/players.csv'
-    df_passing: pd.DataFrame = passing.calc_passing(file_path)
-    df_possesion: pd.DataFrame = possesion.calc_possession(file_path)
-    df_receiving: pd.DataFrame = receiving.calc_receiving(file_path)
-    df_pressure: pd.DataFrame = pressure.calc_pressure(file_path)
+    # file_path: str = f'{util.get_project_root()}/out/players.csv'
+    # df_passing: pd.DataFrame = passing.calc_passing(file_path)
+    # df_possesion: pd.DataFrame = possesion.calc_possession(file_path)
+    # df_receiving: pd.DataFrame = receiving.calc_receiving(file_path)
+    # df_pressure: pd.DataFrame = pressure.calc_pressure(file_path)
 
-    # save these dataframes to sql
-    df_passing.to_sql('Passing', con=engine, if_exists='replace')
-    df_possesion.to_sql('Possesion', con=engine, if_exists='replace')
-    df_receiving.to_sql('Receiving', con=engine, if_exists='replace')
-    df_pressure.to_sql('Pressure', con=engine, if_exists='replace')
+    # # save these dataframes to sql
+    # df_passing.to_sql('Passing', con=engine, if_exists='replace')
+    # df_possesion.to_sql('Possesion', con=engine, if_exists='replace')
+    # df_receiving.to_sql('Receiving', con=engine, if_exists='replace')
+    # df_pressure.to_sql('Pressure', con=engine, if_exists='replace')
