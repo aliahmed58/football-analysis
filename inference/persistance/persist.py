@@ -4,24 +4,27 @@ from google.cloud.sql.connector import Connector
 from inference.persistance.dbkeys import *
 import pandas as pd
 import traceback
+import os
 
-def get_cloud_conn():
-    connector = Connector()
-    conn = connector.connect(
-        CONNECTION_NAME,
-        'pymysql',
-        user=DB_USER,
-        password=DB_PASS,
-        db=DB_NAME
-    )
-    return conn
+# def get_cloud_conn():
+#     connector = Connector()
+#     conn = connector.connect(
+#         CONNECTION_NAME,
+#         'pymysql',
+#         user=DB_USER,
+#         password=DB_PASS,
+#         db=DB_NAME
+#     )
+#     return conn
 
 def get_engine() -> sa.Engine:
-    engine = sa.create_engine(
-        "mysql+pymysql://",
-        creator=get_cloud_conn,
-        echo=True
-    )
+    username = usernamemysql
+    password = passwordmysql 
+    server = servermysql
+    database = databasemysql 
+
+    engine = sa.create_engine(f'mysql+pymysql://{username}:{password}@{server}/{database}')
+
     return engine
 
 def save_list_to_sql(data: list, engine: sa.Engine) -> bool:

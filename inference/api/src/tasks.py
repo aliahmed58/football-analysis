@@ -43,12 +43,12 @@ def infer_footage(full_video_name):
             # saved as webm so it can be easily 
             detection_vid_url = firestore.upload_file_to_firebase(
                 f'{utils.get_project_root()}/out/{task_id}/detection.webm',
-                'detection.webm',
+                'detect/detection.webm',
                 task_id
             )
             map_vid_url: str = firestore.upload_file_to_firebase(
                 f'{utils.get_project_root()}/out/{task_id}/map.webm',
-                'map.webm',
+                'detect/map.webm',
                 task_id
             )
 
@@ -94,7 +94,7 @@ def event_detection(full_video_name):
         
         video_url = firestore.upload_file_to_firebase(
             f'{utils.get_project_root()}/out/{task_id}/events.webm',
-            'events.webm',
+            'event/events.webm',
             task_id
         )
 

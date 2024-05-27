@@ -16,7 +16,7 @@ from inference.detection.yolo_detector import YoloDetector
 from inference.detection.gameanalytics.GameAnalytics import GameAnalytics
 from inference.analysis import passing, possesion, pressure, receiving
 
-object_detector = None
+# object_detector = None
 engine: sa.Engine = None
 
 def detect(input_video_path: str, task_id: str, save_to_db=True): 
@@ -30,9 +30,9 @@ def detect(input_video_path: str, task_id: str, save_to_db=True):
         engine = db.get_engine()
 
 
-    global object_detector
-    if object_detector is None:
-        object_detector = YoloDetector() 
+    # global object_detector
+    # if object_detector is None:
+    object_detector = YoloDetector() 
     
     team_classifier: ColorHistogramClassifier = ColorHistogramClassifier(num_of_teams=3)
         
@@ -108,17 +108,17 @@ def detect(input_video_path: str, task_id: str, save_to_db=True):
     video_writer.release()
     map2d.release()
     
-    file_path: str = f'{output_video_path}/players.csv'
-    df_passing: pd.DataFrame = passing.calc_passing(file_path)
-    df_possesion: pd.DataFrame = possesion.calc_possession(file_path)
-    df_receiving: pd.DataFrame = receiving.calc_receiving(file_path)
-    df_pressure: pd.DataFrame = pressure.calc_pressure(file_path)
+    # file_path: str = f'{output_video_path}/players.csv'
+    # df_passing: pd.DataFrame = passing.calc_passing(file_path)
+    # df_possesion: pd.DataFrame = possesion.calc_possession(file_path)
+    # df_receiving: pd.DataFrame = receiving.calc_receiving(file_path)
+    # df_pressure: pd.DataFrame = pressure.calc_pressure(file_path)
 
-    # save these dataframes to sql
-    df_passing.to_sql('Passing', con=engine, if_exists='replace')
-    df_possesion.to_sql('Possesion', con=engine, if_exists='replace')
-    df_receiving.to_sql('Receiving', con=engine, if_exists='replace')
-    df_pressure.to_sql('Pressure', con=engine, if_exists='replace')
+    # # save these dataframes to sql
+    # df_passing.to_sql('d_passing', con=engine, if_exists='replace')
+    # df_possesion.to_sql('d_possession', con=engine, if_exists='replace')
+    # df_receiving.to_sql('d_receiving', con=engine, if_exists='replace')
+    # df_pressure.to_sql('d_pressure', con=engine, if_exists='replace')
 
     return analysis.player_list
 
