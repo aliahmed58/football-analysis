@@ -3,9 +3,7 @@ import inference.cvdetection as cvdetection
 import cv2
 import numpy as np
 import pandas as pd
-import sqlalchemy as sa
 import inference.util.utils as util
-import inference.persistance.persist as db
 from typing import Generator
 from torch.multiprocessing import set_start_method
 from inference.detection.court_detector import CourtDetector
@@ -16,7 +14,7 @@ from inference.detection.yolo_detector import YoloDetector
 from inference.detection.gameanalytics.GameAnalytics import GameAnalytics
 from inference.analysis import passing, possesion, pressure, receiving
 
-# object_detector = None
+object_detector = None
 # engine: sa.Engine = None
 
 def detect(input_video_path: str, task_id: str, save_to_db=True): 
@@ -24,15 +22,10 @@ def detect(input_video_path: str, task_id: str, save_to_db=True):
     # Create necessary detection objects
     court_detector: CourtDetector = CourtDetector(output_resolution=(1920, 1080))
     camera_estimator: CameraEstimator = CameraEstimator(output_resolution=(1920, 1080))
-    
-    # global engine
-    # if engine is None:
-    #     engine = db.get_engine()
 
-
-    # global object_detector
-    # if object_detector is None:
-    object_detector = YoloDetector() 
+    global object_detector
+    if object_detector is None:
+        object_detector = YoloDetector() 
     
     team_classifier: ColorHistogramClassifier = ColorHistogramClassifier(num_of_teams=3)
         
