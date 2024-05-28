@@ -1,9 +1,11 @@
 from flask import Blueprint, request
 from celery.result import AsyncResult
 from inference.api.src import tasks
+from flask import jsonify
+import json
+import numpy as np
 
 bp = Blueprint('detection', __name__, url_prefix='/infer')
-
 
 @bp.route('/hello', methods=['GET'])
 def hello_world():

@@ -1,5 +1,7 @@
 import traceback
 import inference.persistance.persist as db
+import numpy as np
+import json
 from celery import shared_task
 from inference.main import detect
 from inference.firebase import firestore
@@ -7,6 +9,16 @@ from inference.util import utils
 from celery import states
 from celery.exceptions import Ignore
 from inference.eventdetection import infer
+
+class NpEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, np.integer):
+            return int(obj)
+        if isinstance(obj, np.floating):
+            return float(obj)
+        if isinstance(obj, np.ndarray):
+            return obj.tolist()
+        return super(NpEncoder, self).default(obj)
 
 # -----------------------------------------------------------
 # The celery task for handling player detection and mapping
@@ -52,16 +64,12 @@ def infer_footage(full_video_name):
                 task_id
             )
 
-            # save the list to sql
-            # db.save_list_to_sql(player_list, engine)
-
-            # dispose the engine
-            # engine.dispose()
+            analysis = json.dumps(data)
 
             return {
                 'detection_vid': detection_vid_url,
                 'map_vid': map_vid_url,
-                'analysis': data
+                'analysis': analysis
             }
 
     except Exception as e:
