@@ -3,9 +3,10 @@ import inference.cvdetection as cvdetection
 import cv2
 import numpy as np
 import pandas as pd
+import sqlalchemy as sa
 import inference.util.utils as util
+import inference.persistance.persist as db
 from typing import Generator
-from torch.multiprocessing import set_start_method
 from inference.detection.court_detector import CourtDetector
 from inference.detection.cameraestimator.CameraEstimator import CameraEstimator, estimate
 from inference.detection.teamclassifier.PlayerClustering import ColorHistogramClassifier
@@ -15,13 +16,17 @@ from inference.detection.gameanalytics.GameAnalytics import GameAnalytics
 from inference.analysis import passing, possesion, pressure, receiving
 
 object_detector = None
-# engine: sa.Engine = None
+engine: sa.Engine = None
 
 def detect(input_video_path: str, task_id: str, save_to_db=True): 
     
     # Create necessary detection objects
     court_detector: CourtDetector = CourtDetector(output_resolution=(1920, 1080))
     camera_estimator: CameraEstimator = CameraEstimator(output_resolution=(1920, 1080))
+
+    global engine
+    if engine is None:
+        engine = db.get_engine()
 
     global object_detector
     if object_detector is None:
@@ -101,19 +106,46 @@ def detect(input_video_path: str, task_id: str, save_to_db=True):
     video_writer.release()
     map2d.release()
     
-    # file_path: str = f'{output_video_path}/players.csv'
-    # df_passing: pd.DataFrame = passing.calc_passing(file_path)
-    # df_possesion: pd.DataFrame = possesion.calc_possession(file_path)
-    # df_receiving: pd.DataFrame = receiving.calc_receiving(file_path)
-    # df_pressure: pd.DataFrame = pressure.calc_pressure(file_path)
+    file_path: str = f'{output_video_path}/players.csv'
+    df_passing: pd.DataFrame = passing.calc_passing(file_path)
+    df_possession: pd.DataFrame = possesion.calc_possession(file_path)
+    df_receiving: pd.DataFrame = receiving.calc_receiving(file_path)
+    df_pressure: pd.DataFrame = pressure.calc_pressure(file_path)   
 
-    # # save these dataframes to sql
-    # df_passing.to_sql('d_passing', con=engine, if_exists='replace')
-    # df_possesion.to_sql('d_possession', con=engine, if_exists='replace')
-    # df_receiving.to_sql('d_receiving', con=engine, if_exists='replace')
-    # df_pressure.to_sql('d_pressure', con=engine, if_exists='replace')
+    data: dict = {
+    'Home': {
+        'images': {
 
-    return analysis.player_list
+        },
+        'passes': {
+
+        }
+    },
+    'Away': {
+        'images': {
+
+        },
+        'passes': {
+
+        }
+    }
+    }
+
+    for side in ['Home', 'Away']:
+        # passing
+        passing.create_pass_map_complete(df_passing, side, task_id, data)
+        passing.create_pass_map_incomplete(df_passing, side, task_id, data)
+
+        # receiving
+        receiving.create_receiving_map(df_receiving, side, task_id, data)
+
+        # pressure
+        pressure.create_pressure_map(df_pressure, side, task_id, data)
+
+        # possession
+        possesion.create_heatmap(df_possession, side, task_id, data)
+
+    return data
 
 
 if __name__ == '__main__':

@@ -31,12 +31,12 @@ def infer_footage(full_video_name):
 
     try:
         # start the inference method that does detection and extracts data
-        player_list = detect(
+        data = detect(
         input_video_path=input_video,
         task_id=task_id
         )
         # if it ran successfully, upload the output videos to firebase cloud storage
-        if player_list:
+        if data:
 
             # engine = db.get_engine()
 
@@ -58,7 +58,11 @@ def infer_footage(full_video_name):
             # dispose the engine
             # engine.dispose()
 
-            return [detection_vid_url, map_vid_url]
+            return {
+                'detection_vid': detection_vid_url,
+                'map_vid': map_vid_url,
+                'analysis': data
+            }
 
     except Exception as e:
         print('Exception occured ', e)

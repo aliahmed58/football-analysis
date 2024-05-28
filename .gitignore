@@ -5,6 +5,7 @@ weights/
 out/
 videos/
 dbkeys.py
+firebaseKey.json
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

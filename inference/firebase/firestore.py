@@ -7,7 +7,7 @@ from inference.util import utils
 import traceback
 
 # Use the application default credentials.
-cred = credentials.ApplicationDefault()
+cred = credentials.Certificate(f'{utils.get_project_root()}/firebase/firebaseKey.json')
 
 firebase_admin.initialize_app(
     cred, {

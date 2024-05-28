@@ -1,5 +1,10 @@
 import pandas as pd
 import numpy as np
+import matplotlib.pyplot as plt
+from mplsoccer import Pitch
+from scipy.ndimage import gaussian_filter
+from inference.util import utils
+from inference.firebase import firestore
 
 # Function to calculate Euclidean distance between two points
 def euclidean_distance(point1, point2):
@@ -9,6 +14,12 @@ def euclidean_distance(point1, point2):
 def calc_pressure(file_path: str) -> pd.DataFrame:
     print('Calculating pressure....')
     df = pd.read_csv(file_path)
+
+    team_counts = df['teamId'].value_counts()
+    home_team = team_counts.idxmax()  # Most occurring team
+    away_team = team_counts.index[1]  # Second most occurring team
+    df['teamId'] = df['teamId'].apply(lambda x: 'Home' if x == home_team else ('Away' if x == away_team else 'Other'))
+
     # Radius for pressure calculation
     radius = 5
     # Initialize lists to store x and y points
@@ -74,6 +85,45 @@ def calc_pressure(file_path: str) -> pd.DataFrame:
 
     df_pressure['y_Point'] = df_pressure['y_Point']-over
     
-
     return df_pressure
+
+
+def create_pressure_map(df_pressure: pd.DataFrame, side: str, task_id: str, data: dict):
+    print('Saving pressure map....')
+    pitch = Pitch(line_zorder=2)
+    fig, ax = pitch.draw()
+    df_home = df_pressure[df_pressure['Team'] == side] #side decide here
+    # Calculate the bin statistic with weights based on pressure rating
+    bin_statistic = pitch.bin_statistic(
+        df_home['x_Point'], df_home['y_Point'], df_home['PressureRating'], bins=(10, 5)
+    )
+
+    # Gaussian smoothing of the bin statistic
+    bin_statistic['statistic'] = gaussian_filter(bin_statistic['statistic'], sigma=1)
+
+    # Plot the smoothed heatmap
+    heatmap = pitch.heatmap(bin_statistic, ax=ax, cmap='Reds', edgecolor='#f9f9f9', alpha=0.5)
+    ax.text(45, 0, "Pressure Rating", fontsize=12, color='black', weight='bold')
+
+    #resposne for Dashbaord KPi
+    avg_pressure = df_home['PressureRating'].mean()
+    min_pressure = df_home['PressureRating'].min()
+    max_pressure = df_home['PressureRating'].max()
+
+    out_dir: str = f'{utils.get_project_root()}/out/{task_id}/pressure_{side}.png'
+    plt.savefig(out_dir)
+
+    url = firestore.upload_file_to_firebase(
+        out_dir,
+        f'{side}/pressure.png',
+        task_id
+    )
+
+    data[side]['images']['pressure'] = url
+    
+    data[side]['avg_pressure'] = avg_pressure
+    data[side]['min_pressure'] = min_pressure
+    data[side]['max_pressure'] = max_pressure
+
+
 

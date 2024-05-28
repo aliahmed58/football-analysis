@@ -1,10 +1,10 @@
 import sqlalchemy as sa
+import pandas as pd
+import traceback
+from inference.util import utils
 from google.cloud.sql.connector import Connector
 # db keys should be created with your own configurations
 from inference.persistance.dbkeys import *
-import pandas as pd
-import traceback
-import os
 
 # def get_cloud_conn():
 #     connector = Connector()
@@ -49,6 +49,17 @@ def test_save_list_to_sql():
     save_list_to_sql(data_list, engine)
 
 if __name__ == '__main__':
-    df = pd.read_csv('../out/4de6fcdc-5850-41e8-8e22-bf2dec5c8559/players.csv')
-    df.to_sql('Test', con=get_engine(), if_exists='append')
-    
+    engine = get_engine()
+
+    from inference.analysis import passing, possesion, pressure, receiving
+    file_path: str = f'{utils.get_project_root()}/out/manual-run/players.csv'
+    df_passing: pd.DataFrame = passing.calc_passing(file_path)
+    df_possesion: pd.DataFrame = possesion.calc_possession(file_path)
+    df_receiving: pd.DataFrame = receiving.calc_receiving(file_path)
+    df_pressure: pd.DataFrame = pressure.calc_pressure(file_path)
+
+    # save these dataframes to sql
+    df_passing.to_sql('d_passing', con=engine, if_exists='replace')
+    df_possesion.to_sql('d_possession', con=engine, if_exists='replace')
+    df_receiving.to_sql('d_receiving', con=engine, if_exists='replace')
+    df_pressure.to_sql('d_pressure', con=engine, if_exists='replace')
