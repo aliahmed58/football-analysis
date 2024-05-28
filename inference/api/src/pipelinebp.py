@@ -1,7 +1,7 @@
 from flask import Blueprint, request
 from celery.result import AsyncResult
 from inference.api.src import tasks
-from flask import jsonify
+from flask import jsonify, Response
 import json
 import numpy as np
 
@@ -9,7 +9,15 @@ bp = Blueprint('detection', __name__, url_prefix='/infer')
 
 @bp.route('/hello', methods=['GET'])
 def hello_world():
-    return "<h1> Hello world </h1>"
+    results = tasks.test_insights.delay()
+    return {'result_id': results.id}
+
+@bp.get('/hello/result/<id>')
+def resulttest(id: str):
+    result = AsyncResult(id)
+    return {
+        'value': result.result if result.ready() else False
+    }
 
 # ------------------------------------------------
 # Routes for detection and 2d mapping

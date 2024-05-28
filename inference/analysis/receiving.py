@@ -194,7 +194,6 @@ def create_receiving_map(df_pressure: pd.DataFrame, side: str, task_id: str, dat
 
     data[side]['images']['receiving'] = url
     
-    data[side]['no_of_passes'] = c
-    data[side]['x_max_pressure'] = x
-    data[side]['y_max_pressure'] = y
+    data[side]['x_max_pressure'] = float(x)
+    data[side]['y_max_pressure'] = float(y)
 

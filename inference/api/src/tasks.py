@@ -9,6 +9,8 @@ from inference.util import utils
 from celery import states
 from celery.exceptions import Ignore
 from inference.eventdetection import infer
+from inference.analysis import passing, possesion, pressure, receiving
+from flask import jsonify, make_response
 
 class NpEncoder(json.JSONEncoder):
     def default(self, obj):
@@ -20,6 +22,55 @@ class NpEncoder(json.JSONEncoder):
             return obj.tolist()
         return super(NpEncoder, self).default(obj)
 
+@shared_task(ignore_result=False, serializer='json')
+def test_insights():
+    task_id = 'manual-run'
+    input_file = f'{utils.get_project_root()}/out/{task_id}/players.csv'
+
+    df_passing = passing.calc_passing(input_file)
+    df_receiving = receiving.calc_receiving(input_file)
+    df_pressure = pressure.calc_pressure(input_file)
+    df_possession = possesion.calc_possession(input_file)
+
+    # Home team
+    sides = ['Home', 'Away']
+    # sample output json object, base dict that needs to be passed should be like this.
+    data: dict = {
+        'Home': {
+            'images': {
+
+            },
+            'passes': {
+
+            }
+        },
+        'Away': {
+            'images': {
+
+            },
+            'passes': {
+
+            }
+        }
+    }
+
+    for side in sides:
+        # passing
+        passing.create_pass_map_complete(df_passing, side, task_id, data)
+        passing.create_pass_map_incomplete(df_passing, side, task_id, data)
+
+        # receiving
+        receiving.create_receiving_map(df_receiving, side, task_id, data)
+
+        # pressure
+        pressure.create_pressure_map(df_pressure, side, task_id, data)
+
+        # possession
+        possesion.create_heatmap(df_possession, side, task_id, data)
+
+    return data
+
+
 # -----------------------------------------------------------
 # The celery task for handling player detection and mapping
 # the results to a 2d match + annotating the video. Then,
@@ -27,7 +78,7 @@ class NpEncoder(json.JSONEncoder):
 # output results and produces insights and saves that to a 
 # database on gcp. That data is consumed in a bi dashboard.
 # -----------------------------------------------------------
-@shared_task(ignore_result=False)
+@shared_task(ignore_result=False, serializer='json')
 def infer_footage(full_video_name):
     task_id = infer_footage.request.id
     input_video = None
@@ -64,13 +115,10 @@ def infer_footage(full_video_name):
                 task_id
             )
 
-            analysis = json.dumps(data)
+            data['detection_vid'] = detection_vid_url
+            data['map_vid'] = map_vid_url
 
-            return {
-                'detection_vid': detection_vid_url,
-                'map_vid': map_vid_url,
-                'analysis': analysis
-            }
+            return data
 
     except Exception as e:
         print('Exception occured ', e)
@@ -110,7 +158,16 @@ def event_detection(full_video_name):
             task_id
         )
 
-        return video_url
+        csv_url = firestore.upload_file_to_firebase(
+            f'{utils.get_project_root()}/out/{task_id}/events.csv',
+            'event/events.csv',
+            task_id
+        )
+
+        return {
+            'event_vid': video_url,
+            'csv': csv_url
+        }
 
     except Exception as e:
         print(traceback.format_exc())

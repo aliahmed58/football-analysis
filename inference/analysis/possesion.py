@@ -132,7 +132,7 @@ def create_heatmap(df_heatmap: pd.DataFrame, side: str, task_id: str, data: dict
 
     data[side]['images']['possession'] = url
 
-    data[side]['avg_x'] = avg_x
-    data[side]['avg_y'] = avg_y
+    data[side]['avg_x'] = float(avg_x)
+    data[side]['avg_y'] = float(avg_y)
     
 

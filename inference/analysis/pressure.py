@@ -121,9 +121,9 @@ def create_pressure_map(df_pressure: pd.DataFrame, side: str, task_id: str, data
 
     data[side]['images']['pressure'] = url
     
-    data[side]['avg_pressure'] = avg_pressure
-    data[side]['min_pressure'] = min_pressure
-    data[side]['max_pressure'] = max_pressure
+    data[side]['avg_pressure'] = float(avg_pressure)
+    data[side]['min_pressure'] = float(min_pressure)
+    data[side]['max_pressure'] = float(max_pressure)
 
 
 

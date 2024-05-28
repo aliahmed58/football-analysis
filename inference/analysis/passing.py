@@ -237,12 +237,13 @@ def create_pass_map_complete(df_fin: pd.DataFrame, side: str, task_id: str, data
 
     data[side]['images']['passes_completed'] = url
 
-    data[side]['passes']['incomplete'] = {
-        'normal': NormalPass, 
-        'long': longball,
-        'progressive': progressive,
-        'cutback': cutback,
-        'cross': cross
+    data[side]['passes']['complete'] = {
+        'normal': int(NormalPass), 
+        'long': int(longball),
+        'progressive': int(progressive),
+        'cutback': int(cutback),
+        'cross': int(cross),
+        'total_passes': int(c)
     }
     
 
@@ -313,10 +314,11 @@ def create_pass_map_incomplete(df_fin: pd.DataFrame, side: str, task_id: str, da
 
     data[side]['images']['passes_incomplete'] = url
 
-    data[side]['passes']['complete'] = {
-        'normal': NormalPass, 
-        'long': longball,
-        'progressive': progressive,
-        'cutback': cutback,
-        'cross': cross
+    data[side]['passes']['incomplete'] = {
+        'normal': int(NormalPass), 
+        'long': int(longball),
+        'progressive': int(progressive),
+        'cutback': int(cutback),
+        'cross': int(cross),
+        'total_passes': int(c)
     }
