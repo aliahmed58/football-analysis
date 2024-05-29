@@ -10,17 +10,13 @@ from celery import states
 from celery.exceptions import Ignore
 from inference.eventdetection import infer
 from inference.analysis import passing, possesion, pressure, receiving
-from flask import jsonify, make_response
+import os
 
-class NpEncoder(json.JSONEncoder):
-    def default(self, obj):
-        if isinstance(obj, np.integer):
-            return int(obj)
-        if isinstance(obj, np.floating):
-            return float(obj)
-        if isinstance(obj, np.ndarray):
-            return obj.tolist()
-        return super(NpEncoder, self).default(obj)
+current = set()
+
+def check_if_done(video_name: str):
+    path = f'{utils.get_project_root()}/videos/{video_name}'
+    return os.path.isfile(path)
 
 @shared_task(ignore_result=False, serializer='json')
 def test_insights():
@@ -83,9 +79,14 @@ def infer_footage(full_video_name):
     task_id = infer_footage.request.id
     input_video = None
 
+    alr_done = check_if_done(full_video_name)
+
+    if alr_done:
+        return 'exists'
+
     # try downloading the uploaded video and see if it exists
     try:
-        input_video = firestore.download_file(f'upload/{full_video_name}', 'videos')
+        input_video = firestore.download_file(f'upload/{full_video_name}', 'videos/detect')
     except Exception as e:
         print(traceback.format_exc())
         print('Could not find file on cloud, are you sure ID was correct.')
@@ -107,16 +108,20 @@ def infer_footage(full_video_name):
             detection_vid_url = firestore.upload_file_to_firebase(
                 f'{utils.get_project_root()}/out/{task_id}/detection.webm',
                 'detect/detection.webm',
-                task_id
+                f'detection/{task_id}'
             )
             map_vid_url: str = firestore.upload_file_to_firebase(
                 f'{utils.get_project_root()}/out/{task_id}/map.webm',
                 'detect/map.webm',
-                task_id
+                f'detection/{task_id}'
             )
 
             data['detection_vid'] = detection_vid_url
             data['map_vid'] = map_vid_url
+            data['upload_id'] = full_video_name
+
+            if f'detect/{full_video_name}' in current:
+                current.remove(f'detect/{full_video_name}')
 
             return data
 
@@ -139,10 +144,15 @@ def infer_footage(full_video_name):
 def event_detection(full_video_name):
     task_id = event_detection.request.id
     input_video = None
+
+    alr_done = check_if_done(full_video_name)
+
+    if alr_done:
+        return 'exists'
     
     # try downloading the uploaded video and see if it exists
     try:
-        input_video = firestore.download_file(f'upload/{full_video_name}', 'videos')
+        input_video = firestore.download_file(f'upload/{full_video_name}', 'videos/event')
     except Exception as e:
         print(traceback.format_exc())
         print('Could not find file on cloud, are you sure ID was correct.')
@@ -155,18 +165,22 @@ def event_detection(full_video_name):
         video_url = firestore.upload_file_to_firebase(
             f'{utils.get_project_root()}/out/{task_id}/events.webm',
             'event/events.webm',
-            task_id
+            f'events/{task_id}'
         )
 
         csv_url = firestore.upload_file_to_firebase(
             f'{utils.get_project_root()}/out/{task_id}/events.csv',
             'event/events.csv',
-            task_id
+            f'events/{task_id}'
         )
+
+        if f'event/{full_video_name}' in current:
+            current.remove(f'event/{full_video_name}')
 
         return {
             'event_vid': video_url,
-            'csv': csv_url
+            'csv': csv_url,
+            'upload_id': full_video_name
         }
 
     except Exception as e:
