@@ -45,7 +45,7 @@ def local_classifier3(num_classes=2):
 
     return model
 
-classifier1, classifier2, cards_model = None, None, None
+classifier1_model, classifier2_model, cards_model = None, None, None
 
 def video_classifier(video_path: str, task_id: str):
 
@@ -67,12 +67,12 @@ def video_classifier(video_path: str, task_id: str):
     frameduration = 1/fps
     framecount = 0
 
-    global classifier1, classifier2, cards_model
+    global classifier1_model, classifier2_model, cards_model
 
-    if classifier1 is None:
+    if classifier1_model is None:
         classifier1_model = local_classifier1()
 
-    if classifier2 is None:    
+    if classifier2_model is None:    
         classifier2_model = local_classifier2()
     
     if cards_model is None:
@@ -107,6 +107,8 @@ def video_classifier(video_path: str, task_id: str):
             with torch.no_grad():
                 output1 = classifier1_model(image_tensor)
                 _, predicted1 = torch.max(output1, 1)
+                output2 = classifier2_model(image_tensor)
+                _, predicted2 = torch.max(output2, 1)
                 if predicted1.item() == 1:
         # If predicted1 is 1, write its value on the frame
                     predicted_class1 = map_class_index(predicted1.item(), class_to_idx_mapping_class1)
