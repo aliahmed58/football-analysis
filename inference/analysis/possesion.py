@@ -127,7 +127,7 @@ def create_heatmap(df_heatmap: pd.DataFrame, side: str, task_id: str, data: dict
     url = firestore.upload_file_to_firebase(
         out_dir,
         f'{side}/possession.png',
-        task_id
+        f'detection/{task_id}'
     )
 
     data[side]['images']['possession'] = url

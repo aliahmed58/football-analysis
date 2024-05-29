@@ -232,7 +232,7 @@ def create_pass_map_complete(df_fin: pd.DataFrame, side: str, task_id: str, data
     url = firestore.upload_file_to_firebase(
         out_dir, 
         f'{side}/passes_completed.png',
-        task_id
+        f'detection/{task_id}'
     )
 
     data[side]['images']['passes_completed'] = url
@@ -309,7 +309,7 @@ def create_pass_map_incomplete(df_fin: pd.DataFrame, side: str, task_id: str, da
     url = firestore.upload_file_to_firebase(
         out_dir,
         f'{side}/passes_incomplete.png', 
-        task_id
+        f'detection/{task_id}'
     )
 
     data[side]['images']['passes_incomplete'] = url

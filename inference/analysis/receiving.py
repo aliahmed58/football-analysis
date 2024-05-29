@@ -189,7 +189,7 @@ def create_receiving_map(df_pressure: pd.DataFrame, side: str, task_id: str, dat
     url = firestore.upload_file_to_firebase(
         out_dir,
         f'{side}/receiving.png',
-        task_id
+        f'detection/{task_id}'
     )
 
     data[side]['images']['receiving'] = url

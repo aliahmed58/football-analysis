@@ -116,7 +116,7 @@ def create_pressure_map(df_pressure: pd.DataFrame, side: str, task_id: str, data
     url = firestore.upload_file_to_firebase(
         out_dir,
         f'{side}/pressure.png',
-        task_id
+        f'detection/{task_id}'
     )
 
     data[side]['images']['pressure'] = url
