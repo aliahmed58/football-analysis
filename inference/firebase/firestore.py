@@ -7,11 +7,11 @@ from inference.util import utils
 import traceback
 
 # Use the application default credentials.
-cred = credentials.Certificate(f'{utils.get_project_root()}/firebase/firebaseKey.json')
+cred = credentials.Certificate(f'{utils.get_project_root()}/firebase/fanKey.json')
 
 firebase_admin.initialize_app(
     cred, {
-        'storageBucket': 'fyp-testing-aa31e.appspot.com'
+        'storageBucket': 'fyp-final-e36de.appspot.com'
     }
 )
 
