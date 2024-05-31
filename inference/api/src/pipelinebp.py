@@ -62,7 +62,7 @@ def task_result(id: str) -> dict[str, object]:
     }
 
     if result.ready():
-        with open('res.json', 'w') as f:
+        with open(f'{out_dir}/{id}/res.json', 'w') as f:
             json.dump(res, f)
 
     return res
@@ -73,12 +73,14 @@ def task_result(id: str) -> dict[str, object]:
 @bp.route('/events/<video_id>', methods=['GET'])
 def event_detect(video_id: str):
     if check_if_done(f'event/{video_id}'):
+        print(True)
         return {
             'exists': True
         }
     if f'event/{video_id}' in tasks.current:
+        print(True)
         return {
-            'exists': True
+            'pending': True
         }
     tasks.current.add(f'event/{video_id}')
     results = tasks.event_detection.delay(video_id)
@@ -95,9 +97,15 @@ def event_result(id: str) -> dict[str, object]:
                 return data
 
     result = AsyncResult(id)
-    return {
+    res = {
         "ready": result.ready(),
         "successful": result.successful(),
         "value": result.result if result.ready() else False,
         "state": result.state
     }
+
+    if result.ready():
+        with open(f'{out_dir}/{id}/res.json', 'w') as f:
+            json.dump(res, f)
+
+    return res
