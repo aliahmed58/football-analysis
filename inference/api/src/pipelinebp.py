@@ -4,9 +4,11 @@ from inference.api.src import tasks
 from flask import jsonify, Response
 from inference.util import utils
 import os
+import json
 import numpy as np
 
 bp = Blueprint('detection', __name__, url_prefix='/infer')
+out_dir = f'{utils.get_project_root()}/out'
 
 def check_if_done(video_name: str):
     path = f'{utils.get_project_root()}/videos/{video_name}'
@@ -45,13 +47,25 @@ def detect(video_id: str):
 
 @bp.get("/detect/result/<id>")
 def task_result(id: str) -> dict[str, object]:
+    if os.path.exists(f'{out_dir}/{id}'):
+        if os.path.isfile(f'{out_dir}/{id}/res.json'):
+            with open(f'{out_dir}/{id}/res.json') as f:
+                data = json.load(f)
+                return data
+
     result = AsyncResult(id)
-    return {
+    res = {
         "ready": result.ready(),
         "successful": result.successful(),
         "value": result.result if result.ready() else False,
         "state": result.state
     }
+
+    if result.ready():
+        with open('res.json', 'w') as f:
+            json.dump(res, f)
+
+    return res
 
 # ------------------------------------------------
 # Routes for event detection
@@ -74,6 +88,12 @@ def event_detect(video_id: str):
 
 @bp.get('/events/result/<id>')
 def event_result(id: str) -> dict[str, object]:
+    if os.path.exists(f'{out_dir}/{id}'):
+        if os.path.isfile(f'{out_dir}/{id}/res.json'):
+            with open(f'{out_dir}/{id}/res.json') as f:
+                data = json.load(f)
+                return data
+
     result = AsyncResult(id)
     return {
         "ready": result.ready(),
