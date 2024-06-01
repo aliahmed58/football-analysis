@@ -12,13 +12,33 @@ Flask api with Celery and eventlet to handle background processing. The flask se
 
 List of endpoints:
 
-- `host:port/infer/:<video_id>` 
+- `host:port/infer/detect/:<video_id>` 
+
+Detection and 2D Mapping endpoint
 
 _Request_: Sends a task to the server, video with the given unique video filename is fetched from firebase cloud storage under `uploads/` folder.
 
 _Response_: Sends back a result_id, that is the task unique id assigned to it
 
-- `host:port/result/:<id>`
+- `host:port/infer/detect/result/:<id>`
+
+_Request_: Request the task status from the server providing the result_id given in `/infer` request.
+
+_Response_: Return a json object with the following fields:
+- `ready: Boolean` - tells whether a task is completed or not
+- `successfull: Boolean` - tells whether the task completed successfully or failed
+- `value: Any` - Returns the list of public links annotated and 2d map video uploaded to firebase or False if task failed.
+- `status: 'FAILURE' or 'SUCCESS'` - Returns FAILURE if task is failed due to any error.
+
+- `host:port/infer/event/:<video_id>` 
+
+Event detection of a football footage
+
+_Request_: Sends a task to the server, video with the given unique video filename is fetched from firebase cloud storage under `uploads/` folder.
+
+_Response_: Sends back a result_id, that is the task unique id assigned to it
+
+- `host:port/infer/event/result/:<id>`
 
 _Request_: Request the task status from the server providing the result_id given in `/infer` request.
 
@@ -71,7 +91,13 @@ To run only the inference module, run the `main.py` file by `python main.py`, ma
 
 In the main file provide the video file path and task id to the `detect` function call.
 
-## Inference with web server (Flask + Celery)
+Creating heatmaps and passmaps uses firebase to save video and images, so make sure that is configured with a service account key in `inference/firebase/firestore.py`. To save locally, comment out the saving to firebase in `analysis/`.
+
+## Event Detection Only
+
+To only run the event detection module on video, run the `infer.py` file in `inference/eventdetection/` and provide it an input video and task id.
+
+## Inference, 2D Mapping, Event Detection with web server (Flask + Celery)
 
 Make sure redis is installed and running since Celery makes use of reddit. Celery is not supported on windows with the version in this project.
 

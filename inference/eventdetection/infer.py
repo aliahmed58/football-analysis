@@ -148,4 +148,4 @@ def video_classifier(video_path: str, task_id: str):
     output_video.release()
 
 if __name__ == '__main__':
-    video_classifier(f'{path}/videos/belgium.mp4', 'manual-run-event')
+    video_classifier(f'{path}/videos/event/redcard.mp4', 'redcard')

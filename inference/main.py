@@ -151,8 +151,8 @@ def detect(input_video_path: str, task_id: str, save_to_db=True):
 if __name__ == '__main__':
     # engine = db.get_engine()
     # from inference.firebase import firestore
-    task_id: str = 'manual-run'
-    detect(input_video_path='./videos/test.mp4', task_id=task_id)
+    task_id: str = 'detect-6'
+    detect(input_video_path='./videos/detect/detect-5.mp4', task_id=task_id)
     # detection_url = firestore.upload_file_to_firebase(f'out/manual-run/detection.webm', 'detection.webm', task_id)
     # map_url = firestore.upload_file_to_firebase(f'out/manual-run/map.webm', 'map.webm', task_id)
     # print(
